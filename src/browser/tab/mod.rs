@@ -191,8 +191,8 @@ impl<'a> Tab {
     }
 
     pub fn call_method<C>(&self, method: C) -> Result<C::ReturnObject, Error>
-    where
-        C: protocol::Method + serde::Serialize + std::fmt::Debug,
+        where
+            C: protocol::Method + serde::Serialize + std::fmt::Debug,
     {
         trace!("Calling method: {:?}", method);
         let result = self
@@ -309,7 +309,7 @@ impl<'a> Tab {
                 node_id: root_node_id,
                 selector,
             })?
-            .node_ids
+                .node_ids
         };
 
         if node_ids.is_empty() {
@@ -478,6 +478,15 @@ impl<'a> Tab {
             .call_method(page::methods::PrintToPdf { options })?
             .data;
         base64::decode(&data).map_err(Into::into)
+    }
+
+    pub fn emulate_media(&self, options: Option<page::EmulateMediaOptions>) -> Result<&Self, Error> {
+        match self.call_method(page::methods::EmulateMedia { options }) {
+            _ => {
+                Some(());
+            }
+        }
+        Ok(self)
     }
 
     /// Reloads given page optionally ignoring the cache

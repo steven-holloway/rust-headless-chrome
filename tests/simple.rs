@@ -11,6 +11,7 @@ use headless_chrome::protocol::network::methods::RequestPattern;
 use headless_chrome::{
     browser::default_executable, browser::tab::Tab, protocol::page::ScreenshotFormat, Browser,
     LaunchOptionsBuilder,
+    protocol::page::EmulateMediaOptions
 };
 use std::thread::sleep;
 use std::time::Duration;
@@ -36,7 +37,7 @@ fn dumb_client(server: &server::Server) -> (Browser, Arc<Tab>) {
             .build()
             .unwrap(),
     )
-    .unwrap();
+        .unwrap();
     let tab = browser.wait_for_initial_tab().unwrap();
     tab.navigate_to(&format!("http://127.0.0.1:{}", server.port()))
         .unwrap();
@@ -166,6 +167,25 @@ fn test_print_file_to_pdf() -> Result<(), failure::Error> {
     let local_pdf = tab.wait_until_navigated()?.print_to_pdf(None)?;
     assert_eq!(true, local_pdf.len() > 1000); // an arbitrary size
     assert!(local_pdf.starts_with(b"%PDF"));
+    Ok(())
+}
+
+#[test]
+fn test_emulate_media() -> Result<(), failure::Error> {
+    logging::enable_logging();
+    let options = EmulateMediaOptions {
+        media_type: "screen".to_string()
+    };
+
+    let (_, browser, tab) = dumb_server(include_str!("./pdfassets/index.html"));
+    let response = tab.wait_until_navigated()?.emulate_media(Some(options))?;
+
+//    async emulateMedia(mediaType) {
+//        assert(mediaType === 'screen' || mediaType === 'print' || mediaType === null, 'Unsupported media type: ' + mediaType);
+//        await this._client.send('Emulation.setEmulatedMedia', {media: mediaType || ''});
+//    }
+
+
     Ok(())
 }
 
@@ -320,7 +340,7 @@ fn set_request_interception() -> Result<(), failure::Error> {
             .build()
             .unwrap(),
     )
-    .unwrap();
+        .unwrap();
 
     let tab = browser.wait_for_initial_tab().unwrap();
 
@@ -350,7 +370,7 @@ fn set_request_interception() -> Result<(), failure::Error> {
                         &b"Content-Type"[..],
                         &b"application/javascript"[..],
                     )
-                    .unwrap()],
+                        .unwrap()],
                     js_body.as_bytes(),
                     Some(js_body.len()),
                     None,
@@ -410,7 +430,7 @@ fn get_script_source() -> Result<(), failure::Error> {
             .build()
             .unwrap(),
     )
-    .unwrap();
+        .unwrap();
 
     let tab: Arc<Tab> = browser.wait_for_initial_tab()?;
 

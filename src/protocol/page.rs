@@ -78,6 +78,12 @@ pub struct PrintToPdfOptions {
     pub prefer_css_page_size: Option<bool>,
 }
 
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct EmulateMediaOptions {
+    pub media_type: String
+}
+
 pub mod events {
     use serde::Deserialize;
     #[derive(Deserialize, Debug, Clone)]
@@ -126,6 +132,7 @@ pub mod events {
 
 pub mod methods {
     use super::PrintToPdfOptions;
+    use super::EmulateMediaOptions;
     use crate::protocol::Method;
     use serde::{Deserialize, Serialize};
 
@@ -163,6 +170,22 @@ pub mod methods {
     impl Method for PrintToPdf {
         const NAME: &'static str = "Page.printToPDF";
         type ReturnObject = PrintToPdfReturnObject;
+    }
+
+    #[derive(Serialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub(crate) struct EmulateMedia {
+        #[serde(flatten)]
+        pub options: Option<EmulateMediaOptions>,
+    }
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct EmulateMediaReturnObject {
+        pub data: String,
+    }
+    impl Method for EmulateMedia {
+        const NAME: &'static str = "Emulation.setEmulatedMedia";
+        type ReturnObject = EmulateMediaReturnObject;
     }
 
     #[derive(Serialize, Debug)]
